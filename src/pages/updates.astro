@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import UpdateList from '../components/UpdateList.astro';
+import { updates } from '../data/updates';
+---
+
+<Base title="Updates" description="Recent updates from Noah Okada: papers, fellowships, and what he is working on.">
+  <section class="wrap page-head">
+    <h1>Updates</h1>
+  </section>
+
+  <section class="wrap section">
+    <UpdateList items={updates} />
+  </section>
+</Base>

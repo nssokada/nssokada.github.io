@@ -1,0 +1,63 @@
+---
+import '../styles/global.css';
+// Newsreader, the site's serif (see the Typefaces section of global.css).
+import '@fontsource-variable/newsreader/wght.css';
+import '@fontsource-variable/newsreader/wght-italic.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogType?: 'website' | 'article';
+}
+
+const { title, description = site.description, ogType = 'website' } = Astro.props;
+const pageTitle = title ? `${title} · ${site.name}` : `${site.name} · Cognition across humans and AI`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title ?? site.name} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#ffffff" />
+    <!-- Light by default. Dark only when the visitor has chosen it; set before first paint. -->
+    <script is:inline define:vars={{ DEFAULT_FONT: site.font, DEFAULT_HERO: site.hero, DEFAULT_PALETTE: site.palette }}>
+      (function () {
+        var stored = null;
+        try { stored = localStorage.getItem('theme'); } catch (e) {}
+        var dark = stored === 'dark';
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        // Typeface, homepage layout and palette, from src/data/site.ts.
+        var root = document.documentElement;
+        root.dataset.font = DEFAULT_FONT;
+        root.dataset.hero = DEFAULT_HERO;
+        root.dataset.palette = DEFAULT_PALETTE;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', dark ? '#000000' : '#ffffff');
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main" class="wash-clip">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

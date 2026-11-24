@@ -1,0 +1,39 @@
+---
+import type { Publication } from '../data/publications';
+
+interface Props {
+  items: Publication[];
+}
+const { items } = Astro.props;
+// Bold Noah's name wherever it appears in the author list.
+const emphasize = (authors: string) => authors.replace(/Okada, N\.(?: S\.)?\*?/g, (m) => `<strong>${m}</strong>`);
+---
+
+<ol class="pubs">
+  {
+    items.map((p) => (
+      <li>
+        <p class="title">{p.href ? <a href={p.href}>{p.title}</a> : p.title}</p>
+        <p class="authors" set:html={emphasize(p.authors)} />
+        <p class="venue">
+          <span>{p.venue}</span>
+          <span aria-hidden="true">·</span>
+          <span>{p.year}</span>
+          <span aria-hidden="true">·</span>
+          <span>{p.kind}</span>
+          {p.note && <><span aria-hidden="true">·</span><span>{p.note}</span></>}
+        </p>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .pubs { list-style: none; margin: 0; padding: 0; }
+  .pubs li { padding-block: 9px; max-width: 760px; }
+  p { margin: 0; }
+  .title { line-height: 1.4; }
+  .authors, .venue { font-size: 14px; color: var(--muted); line-height: 1.45; margin-top: 2px; }
+  .authors :global(strong) { color: var(--fg); }
+  .venue { display: flex; flex-wrap: wrap; gap: 0 7px; }
+</style>

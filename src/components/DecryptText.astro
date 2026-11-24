@@ -1,0 +1,195 @@
+---
+// Inline text that "decrypts" into a second phrase on hover, keyboard focus, or tap,
+// and back again on leave: it scrambles through random characters and resolves left
+// to right in about 700ms.
+//
+//   <DecryptText from="emotion" to="fear · anxiety" />
+//
+// - reserve="both" (default): both phrases are laid out invisibly to reserve the wider
+//   width, so nothing around it moves and the hover area never changes size. Best when
+//   the two phrases are about the same length.
+// - reserve="none": no space is held open. The box glides from one width to the other
+//   in step with the text, so there is no gap at rest; the words after it slide along.
+//   Use this when the second phrase is much longer than the first.
+// - The original phrase is the only real text in the HTML, so screen readers, search
+//   engines and copy-paste get it cleanly; the animated copy is hidden from them.
+// - With reduced motion the text switches immediately.
+// - Inside a link: focusing the link triggers it. On touch, the first tap shows the
+//   second phrase and the next tap follows the link.
+interface Props {
+  from: string;
+  to: string;
+  reserve?: 'both' | 'none';
+}
+const { from, to, reserve = 'both' } = Astro.props;
+---
+
+<span class="decrypt" data-from={from} data-to={to} data-reserve={reserve}><span class="base">{from}</span><span class="live" aria-hidden="true"></span></span>
+
+<style>
+  .decrypt {
+    position: relative;
+    display: inline-grid;
+    white-space: nowrap;
+    vertical-align: baseline;
+    cursor: inherit;
+  }
+  /* The original phrase and (invisibly) the second phrase share one cell, so the box is
+     as wide as the wider of the two. The original is real text: it is what screen
+     readers, search engines, copy-paste and no-JavaScript visitors get. */
+  .base { grid-area: 1 / 1; }
+  .decrypt::after { content: attr(data-to); grid-area: 1 / 1; visibility: hidden; }
+  /* reserve="none": only the original phrase sets the width; the script animates it. */
+  .decrypt[data-reserve='none']::after { content: none; }
+  /* Once the script is running, the animated copy takes over visually. It is out of
+     flow, so scrambled glyphs can never resize the box. */
+  .decrypt:global(.is-ready) .base { opacity: 0; }
+  .live {
+    position: absolute;
+    left: 0;
+    top: 0;
+    white-space: pre;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  /* Underlines do not pass into this box from a parent link, so restate the site's link underline. */
+  :global(a) .base,
+  :global(a) .live {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.14em;
+  }
+</style>
+
+<script>
+  import { TICK, smooth, randomChar } from '../lib/scramble';
+  const DURATION = 700;
+
+  function init(root: HTMLElement) {
+    const live = root.querySelector<HTMLElement>('.live')!;
+    const from = root.dataset.from ?? '';
+    const to = root.dataset.to ?? '';
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const link = root.closest('a');
+    const fluid = root.dataset.reserve === 'none';
+
+    // Width of a phrase in this element's own font (only needed when no space is reserved).
+    const measurer = document.createElement('span');
+    measurer.setAttribute('aria-hidden', 'true');
+    measurer.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;white-space:pre;pointer-events:none';
+    const widthOf = (text: string) => {
+      measurer.textContent = text;
+      root.appendChild(measurer);
+      const w = measurer.getBoundingClientRect().width;
+      measurer.remove();
+      return w;
+    };
+    const settleWidth = (target: string) => { root.style.width = target === from ? '' : `${widthOf(target)}px`; };
+
+    let shown = from; // what is currently on screen
+    let goal = from; // the phrase we are resolving towards
+    let raf = 0;
+    let lastPointer = 'mouse';
+
+    live.textContent = from;
+    root.classList.add('is-ready');
+
+    function run(target: string) {
+      if (target === goal && (raf || shown === target)) return; // already there or on the way
+      goal = target;
+      cancelAnimationFrame(raf); // one animation at a time: a new request replaces the old
+      raf = 0;
+      if (reduceMotion.matches) {
+        shown = target;
+        live.textContent = target;
+        if (fluid) settleWidth(target);
+        return;
+      }
+      const startWidth = fluid ? root.getBoundingClientRect().width : 0;
+      const endWidth = fluid ? widthOf(target) : 0;
+      const startLength = shown.length;
+      const start = performance.now();
+      let lastRoll = -Infinity;
+      let tail = '';
+      const step = (now: number) => {
+        const p = Math.min(1, (now - start) / DURATION);
+        const e = smooth(p);
+        const resolved = Math.floor(e * target.length);
+        const length = Math.max(resolved, Math.round(startLength + (target.length - startLength) * e));
+        if (now - lastRoll >= TICK) {
+          lastRoll = now;
+          tail = '';
+          for (let i = resolved; i < length; i++) tail += target[i] === ' ' ? ' ' : randomChar();
+        }
+        shown = target.slice(0, resolved) + tail.slice(0, length - resolved);
+        live.textContent = shown;
+        if (fluid) root.style.width = `${startWidth + (endWidth - startWidth) * e}px`;
+        if (p < 1) {
+          raf = requestAnimationFrame(step);
+        } else {
+          raf = 0;
+          shown = target;
+          live.textContent = target;
+          if (fluid) settleWidth(target);
+        }
+      };
+      raf = requestAnimationFrame(step);
+    }
+
+    const open = () => run(to);
+    const close = () => run(from);
+    const isOpen = () => goal === to;
+
+    // Mouse: hover. With reserve="none" on a narrow line, the widened box can wrap onto the
+    // next line and slip out from under a pointer that has not moved. Closing then would
+    // bring it straight back and loop forever, so a "leave" only counts once the pointer
+    // is outside both where the box was when it was entered and where the box is now.
+    let anchor: DOMRect | null = null;
+    const within = (r: DOMRect, e: PointerEvent) =>
+      e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    const watch = (e: PointerEvent) => {
+      if (anchor && (within(anchor, e) || within(root.getBoundingClientRect(), e))) return;
+      document.removeEventListener('pointermove', watch);
+      anchor = null;
+      close();
+    };
+    root.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      if (!anchor) anchor = root.getBoundingClientRect();
+      open();
+    });
+    root.addEventListener('pointerleave', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      document.removeEventListener('pointermove', watch);
+      if (anchor && within(anchor, e)) {
+        document.addEventListener('pointermove', watch); // the box moved, not the pointer
+      } else {
+        anchor = null;
+        close();
+      }
+    });
+
+    // Keyboard: follows focus on the surrounding link (or on the text itself if it is not in one).
+    const focusTarget: HTMLElement = link ?? root;
+    if (!link) root.tabIndex = 0;
+    focusTarget.addEventListener('focus', () => { if (focusTarget.matches(':focus-visible')) open(); });
+    focusTarget.addEventListener('blur', close);
+
+    // Touch and pen: tap toggles. Inside a link, the tap that opens it does not navigate.
+    root.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; });
+    root.addEventListener('click', (e) => {
+      if (lastPointer === 'mouse') return;
+      if (!isOpen()) {
+        e.preventDefault();
+        open();
+      } else if (!link) {
+        close();
+      }
+    });
+    document.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse' && isOpen() && !root.contains(e.target as Node)) close();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>('.decrypt').forEach(init);
+</script>

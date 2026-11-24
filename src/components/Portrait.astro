@@ -1,0 +1,86 @@
+---
+// Portrait beside the introduction: a soft-edged orb. The accent gradients sit behind
+// the photo as a halo, and the whole thing fades out at the edge so there is no hard
+// frame. Replace src/assets/portrait.jpg to change the photo.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Todo from './Todo.astro';
+
+const found = import.meta.glob<{ default: ImageMetadata }>('../assets/portrait.{jpg,jpeg,png,webp}', { eager: true });
+const portrait = Object.values(found)[0]?.default;
+---
+
+{
+  portrait ? (
+    <div class="portrait">
+      <div class="glow" aria-hidden="true" />
+      <Image class="face" src={portrait} alt="Portrait of Noah Okada" width={760} height={760} fit="cover" position="center" loading="eager" />
+      <div class="tint" aria-hidden="true" />
+    </div>
+  ) : (
+    <div class="missing">
+      <Todo note="portrait: add Noah's photo at src/assets/portrait.jpg" />
+    </div>
+  )
+}
+
+<style>
+  .portrait {
+    /* Tune these to taste. */
+    --size: var(--portrait-size, 380px);
+    --face-edge: 68%; /* the photo is fully clear out to here, then fades into the halo */
+    --face-fade: 96%; /* where the photo has faded out completely */
+    --glow-edge: 72%; /* where the colored halo itself starts fading into the page */
+    --tint-opacity: 0.7; /* strength of the color wash on the photo's outer edge */
+
+    --warm: color-mix(in srgb, var(--c1) 88%, transparent);
+    --cool: color-mix(in srgb, var(--c2) 88%, transparent);
+    position: relative;
+    flex: none;
+    width: var(--size);
+    height: var(--size);
+    -webkit-mask-image: radial-gradient(closest-side, #000 var(--glow-edge), transparent 100%);
+    mask-image: radial-gradient(closest-side, #000 var(--glow-edge), transparent 100%);
+  }
+  .glow,
+  .tint,
+  .portrait :global(.face) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  /* The halo: first accent from the upper left, second from the lower right. */
+  .glow {
+    background:
+      radial-gradient(66% 66% at 22% 20%, var(--warm), transparent 76%),
+      radial-gradient(66% 66% at 82% 84%, var(--cool), transparent 76%),
+      var(--bg);
+  }
+  /* The face is fully clear in the middle and dissolves into the halo at its edge. */
+  .portrait :global(.face) {
+    object-fit: cover;
+    object-position: 50% 50%;
+    -webkit-mask-image: radial-gradient(closest-side, #000 var(--face-edge), transparent var(--face-fade));
+    mask-image: radial-gradient(closest-side, #000 var(--face-edge), transparent var(--face-fade));
+  }
+  /* Color wash on the outer ring of the photo only, so the face itself stays true. */
+  .tint {
+    background:
+      radial-gradient(66% 66% at 22% 20%, var(--warm), transparent 76%),
+      radial-gradient(66% 66% at 82% 84%, var(--cool), transparent 76%);
+    mix-blend-mode: soft-light;
+    opacity: var(--tint-opacity);
+    -webkit-mask-image: radial-gradient(closest-side, transparent 52%, #000 86%);
+    mask-image: radial-gradient(closest-side, transparent 52%, #000 86%);
+  }
+  .missing { flex: none; width: 264px; }
+  /* Stacked above the text (see the homepage's 900px breakpoint): a little smaller. */
+  @media (max-width: 900px) {
+    .portrait { --size: 320px; }
+  }
+  /* Phones: centered under the name (see the homepage's phone layout). */
+  @media (max-width: 720px) {
+    .portrait { --size: clamp(200px, 62vw, 250px); }
+  }
+</style>

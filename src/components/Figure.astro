@@ -1,0 +1,27 @@
+---
+// Figure for project stories and writing. Use `wide` to extend past the reading column.
+// In MDX: import the image, then <Figure src={img} alt="..." caption="..." wide />
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  wide?: boolean;
+}
+const { src, alt, caption, wide = false } = Astro.props;
+---
+
+<figure class:list={['figure', { wide }]}>
+  <Image src={src} alt={alt} widths={[480, 800, 1200, 1600]} sizes={wide ? '(min-width: 1128px) 1080px, 100vw' : '(min-width: 728px) 680px, 100vw'} />
+  {caption && <figcaption>{caption}</figcaption>}
+  <slot />
+</figure>
+
+<style>
+  .figure { margin: 2em 0; }
+  .figure.wide { width: min(var(--page), calc(100vw - 2 * var(--gutter))); max-width: none; }
+  .figure :global(img) { width: 100%; border-radius: var(--radius); }
+  figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; max-width: var(--read); line-height: 1.45; }
+</style>

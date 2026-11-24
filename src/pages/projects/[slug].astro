@@ -1,0 +1,149 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Label from '../../components/Label.astro';
+import LinkRow from '../../components/LinkRow.astro';
+import ProjectVisual from '../../components/ProjectVisual.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import PublicationList from '../../components/PublicationList.astro';
+import Figure from '../../components/Figure.astro';
+import Todo from '../../components/Todo.astro';
+import Link from '../../components/Link.astro';
+import { allProjects, type Project } from '../../lib/projects';
+import { publicationsByKey } from '../../data/publications';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const projects = await allProjects();
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+interface Props {
+  project: Project;
+}
+const { project } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+
+const pubs = data.publications.map((key) => {
+  const pub = publicationsByKey[key];
+  if (!pub) throw new Error(`Project "${project.id}" references unknown publication "${key}"`);
+  return pub;
+});
+const others = (await allProjects()).filter((p) => p.id !== project.id).slice(0, 2);
+---
+
+<Base title={data.title} description={data.summary} ogType="article">
+  <article>
+    <header class="wrap head">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a class="plain" href={url('/research/')}><span aria-hidden="true">/</span>research</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page">{data.shortTitle ?? project.id}</li>
+        </ol>
+      </nav>
+      <h1>{data.title}</h1>
+      <p class="lede">{data.summary}</p>
+
+      <dl class="facts">
+        <div>
+          <dt>When</dt>
+          <dd>{data.period}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>{data.status}</dd>
+        </div>
+        {
+          data.institution && (
+            <div>
+              <dt>Where</dt>
+              <dd>{data.institution}</dd>
+            </div>
+          )
+        }
+        <div class="span">
+          <dt>My role</dt>
+          <dd>{data.role}</dd>
+        </div>
+        {
+          data.collaborators.length > 0 && (
+            <div class="span">
+              <dt>With</dt>
+              <dd>{data.collaborators.join(', ')}</dd>
+            </div>
+          )
+        }
+      </dl>
+
+      {data.links.length > 0 && <div class="resources"><LinkRow links={data.links} label="Resources" /></div>}
+    </header>
+
+    {
+      data.image && (
+        <div class="wrap hero">
+          <ProjectVisual project={project} size="hero" />
+        </div>
+      )
+    }
+
+    <div class="wrap body">
+      <div class="prose">
+        <Content components={{ Todo, Figure, a: Link }} />
+      </div>
+    </div>
+
+    {
+      pubs.length > 0 && (
+        <section class="wrap section">
+          <Label>related publications</Label>
+          <PublicationList items={pubs} />
+        </section>
+      )
+    }
+  </article>
+
+  <section class="wrap section">
+    <Label moreHref={url('/research/')} moreLabel="all research">more projects</Label>
+    <ul class="more">
+      {others.map((p) => <li><ProjectCard project={p} /></li>)}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .head { padding-block: clamp(32px, 6vw, 60px) clamp(20px, 3vw, 32px); }
+  h1 { font-size: clamp(28px, 4.2vw, 40px); letter-spacing: -0.025em; line-height: 1.12; max-width: 18em; margin-bottom: 14px; }
+  .lede { max-width: 34em; }
+  .facts {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 4px 20px;
+    margin: 26px 0 0;
+    max-width: 720px;
+    font-size: 16px;
+  }
+  .facts > div { display: contents; }
+  dt { color: var(--muted); }
+  dd { margin: 0; }
+  .resources { margin-top: 22px; }
+  .hero { margin-bottom: clamp(24px, 4vw, 40px); }
+  .body { padding-bottom: clamp(16px, 3vw, 28px); }
+  .more {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px clamp(22px, 3.5vw, 36px);
+  }
+  @media (max-width: 720px) {
+    .facts { gap: 5px 16px; margin-top: 20px; }
+    /* Resource links stack, one per line, instead of wrapping mid-row. */
+    .resources { margin-top: 14px; }
+    .resources :global(.linkrow) { flex-direction: column; }
+    .resources :global(.linkrow li::after) { content: none; }
+    .more { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

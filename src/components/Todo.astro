@@ -1,0 +1,21 @@
+---
+// Internal placeholder for content still owed. Shown as a quiet "// todo" line
+// in development; `npm run build` (the launch build) fails while any remain.
+interface Props {
+  note: string;
+}
+const { note } = Astro.props;
+---
+
+<aside class="todo" data-internal-todo={note}><span aria-hidden="true">// todo: </span>{note}</aside>
+
+<style>
+  .todo {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: var(--read);
+    margin-block: 10px;
+  }
+</style>

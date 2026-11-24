@@ -1,0 +1,93 @@
+---
+title: "Déjà vu and memory in virtual reality"
+shortTitle: "deja-vu"
+summary: "A virtual reality paradigm that puts people inside moving, first-person scenes to study recall, familiarity, and the feeling of déjà vu."
+emphasis:
+  neuroscience: "A VR paradigm with 128 first-person scenes for studying recall, familiarity, and déjà vu, tested across three levels of immersion."
+period: "2020 to 2024"
+sortDate: 2024-06-01
+status: "Published"
+institution: "Emory University School of Medicine"
+role: "First author and co-corresponding author of the paradigm paper."
+collaborators:
+  - "Katherine L. McNeely-White"
+  - "Anne M. Cleary"
+  - "Brooke N. Carlaw"
+  - "Daniel L. Drane"
+  - "Thomas D. Parsons"
+  - "Timothy McMahan"
+  - "Joseph Neisser"
+  - "Nigel P. Pedersen"
+topics: ["neuroscience", "memory", "vr"]
+accent: "dawn"
+links:
+  - label: "Paper (Behavior Research Methods)"
+    href: "https://doi.org/10.3758/s13428-023-02243-w"
+  - label: "Stimuli and data (OSF)"
+    href: "https://osf.io/s68rc/"
+publications: ["vr-paradigm-2024", "deja-vu-case-2021", "eye-gaze-familiarity-2024"]
+---
+
+Most memory experiments show people static pictures or word lists. But remembering an episode from your life is closer to remembering your place in a scene that unfolds around you. This project built a set of virtual environments, and a task to go with them, for studying memory from that first-person point of view.
+
+One thing the task can do reliably is produce déjà vu in the lab: the feeling that a new place is familiar when you cannot say why.
+
+## The idea
+
+Déjà vu may come from spatial resemblance. If a new scene is laid out like one you have seen before, and you fail to recall the earlier scene, the layout can still feel familiar. To test this you need pairs of scenes that look nothing alike in content but share the same arrangement in space.
+
+## The stimulus set
+
+We built 128 distinct virtual environments, arranged as 64 pairs. The two scenes in a pair are different places, such as a playground and a junkyard, with objects placed at matching locations and the same camera path through them. Each path ends in a turn.
+
+The scenes were built in Unity from open-source 3D objects. We quantified how similar each pair's layout was by computing the Sørensen–Dice index on binary images of each scene taken from an isometric perspective.
+
+## The task
+
+In the study phase, participants take a series of 15-second first-person tours while a recorded voice names each scene. In the test phase they tour new scenes. Half of these share their layout and path with a scene from the study phase, and each tour stops just before the final turn.
+
+After each test tour, participants report whether they felt déjà vu, how strongly they feel they know which way the next turn goes, their guess of left or right, how familiar the scene feels, and the name of any studied scene it brought to mind. The analyses focus on trials where recall failed.
+
+## Three levels of immersion
+
+All participants were Colorado State University undergraduates. Two preliminary samples (13 remote, 17 in person) confirmed that the scenes were easy to name. The main experiments then ran the same task three ways:
+
+| Experiment | Setting | Participants |
+| --- | --- | --- |
+| 2a | Remote, 2D video | 56 |
+| 2b | In person, 2D video | 62 |
+| 3 | Head-mounted display (HTC Vive Pro) | 20 |
+
+## What we found
+
+### Layout alone makes a new scene feel familiar
+
+When people could not recall the matching studied scene, they still rated scenes with a studied layout as more familiar than scenes without one. This held in all three experiments (*p* = .002, *p* < .001, and *p* = .002).
+
+### The same scenes produced more déjà vu
+
+Participants reported déjà vu more often for scenes with a studied layout, again in all three experiments (*p* = .01, *p* < .001, and *p* = .02).
+
+### Déjà vu came with a feeling of knowing what happens next
+
+When participants reported déjà vu, they felt more strongly that they knew the direction of the next turn (*p* < .001 in each experiment). In the two video experiments that feeling did not track accuracy: déjà vu was unrelated to whether the guess was right. In the headset experiment, guesses were more accurate during déjà vu. That is the first result of its kind, and the paper urges caution about it.
+
+### Immersion mattered
+
+Recall was higher in the headset than in either video experiment, and so was the rate of déjà vu for scenes with a studied layout. Running the task remotely or in person made no significant difference to the main patterns.
+
+## Related work
+
+An earlier case report used a virtual tour paradigm of this kind with a patient who had a history of focal medial temporal lobe seizures and was being monitored with intracranial EEG. The patient reported the common, non-seizure kind of déjà vu during the task, without associated abnormalities in the recording ([Epilepsy & Behavior, 2021](https://doi.org/10.1016/j.yebeh.2021.108373)).
+
+I'm also a co-author of a conference paper on automatically identifying the sense of familiarity from eye-gaze features ([HCI International, 2024](https://doi.org/10.1007/978-3-031-60405-8_19)).
+
+## Limitations
+
+Navigation was passive. Participants were moved along a fixed path and could only turn their heads, and they only ever saw the scenes from a first-person view. The headset experiment used yes/no prompts where the video experiments used rating scales, and with 20 participants it may have been underpowered for the turn-prediction analysis.
+
+## Where this could go
+
+The paper suggests comparing first-person with map-like (allocentric) views, and notes that passive navigation was a deliberate trade for experimental control. The task can be used with clinical populations who have memory deficits, and combined with fMRI, electrophysiology, and eye tracking. The stimuli, data, and Unity files are [available on OSF](https://osf.io/s68rc/).
+
+I'm also interested in whether scene sets like this are useful for studying spatial intelligence more broadly. That is a direction I'd like to explore, not something these studies tested.

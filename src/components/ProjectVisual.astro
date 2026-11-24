@@ -1,0 +1,66 @@
+---
+// A project's lead visual: its image if one is supplied, otherwise a
+// localized orange/blue gradient panel carrying the project's slash label.
+import { Image } from 'astro:assets';
+import type { Project } from '../lib/projects';
+
+interface Props {
+  project: Project;
+  size?: 'card' | 'hero';
+}
+const { project, size = 'card' } = Astro.props;
+const { image, imageAlt, accent, shortTitle, title } = project.data;
+---
+
+{
+  image ? (
+    <Image
+      class:list={['visual', size]}
+      src={image}
+      alt={imageAlt ?? ''}
+      widths={[480, 800, 1200, 1600]}
+      sizes={size === 'hero' ? '(min-width: 1128px) 1080px, 100vw' : '(min-width: 760px) 520px, 100vw'}
+    />
+  ) : (
+    <div class:list={['visual', 'gradient', size]} data-accent={accent} aria-hidden="true">
+      <span class="mark">/{(shortTitle ?? title).toLowerCase()}</span>
+    </div>
+  )
+}
+
+<style>
+  .visual {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .visual.hero { aspect-ratio: 21 / 9; }
+  /* Soft, airy gradient panels: color lives here, not in the page chrome. */
+  .gradient { display: flex; align-items: flex-end; padding: clamp(12px, 2vw, 18px); }
+  .gradient {
+    /* Each accent fades toward --base (the page color) in three steps. */
+    --base: #fff;
+    --strong: 72%;
+    --soft: 36%;
+    --faint: 12%;
+    --a: color-mix(in srgb, var(--c1) var(--strong), var(--base));
+    --a-soft: color-mix(in srgb, var(--c1) var(--soft), var(--base));
+    --a-faint: color-mix(in srgb, var(--c1) var(--faint), var(--base));
+    --b: color-mix(in srgb, var(--c2) var(--strong), var(--base));
+    --b-soft: color-mix(in srgb, var(--c2) var(--soft), var(--base));
+    --b-faint: color-mix(in srgb, var(--c2) var(--faint), var(--base));
+  }
+  /* Dark theme: the accents are white and gray, shading quietly up out of black. */
+  :global([data-theme='dark']) .gradient { --base: #000; --strong: 34%; --soft: 16%; --faint: 5%; }
+  .gradient[data-accent='orange'] { background: linear-gradient(to top right, var(--a) 0%, var(--a-soft) 55%, var(--a-faint) 100%); }
+  .gradient[data-accent='blue'] { background: linear-gradient(to top right, var(--b) 0%, var(--b-soft) 55%, var(--b-faint) 100%); }
+  .gradient[data-accent='dusk'] { background: linear-gradient(to top right, var(--b) 0%, var(--b-soft) 42%, var(--a-soft) 78%, var(--a) 100%); }
+  .gradient[data-accent='dawn'] { background: linear-gradient(to top right, var(--a) 0%, var(--a-soft) 40%, var(--b-soft) 76%, var(--b) 100%); }
+  .mark { color: var(--fg); font-size: 14px; font-weight: var(--w-light); }
+  /* Phones: a shorter band, so a list of projects is not mostly thumbnails. */
+  @media (max-width: 720px) {
+    .visual:not(.hero) { aspect-ratio: 5 / 2; }
+  }
+</style>

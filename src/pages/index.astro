@@ -1,0 +1,127 @@
+---
+import Base from '../layouts/Base.astro';
+import Label from '../components/Label.astro';
+import LinkRow from '../components/LinkRow.astro';
+import Portrait from '../components/Portrait.astro';
+import DecryptText from '../components/DecryptText.astro';
+import ProjectGrid from '../components/ProjectGrid.astro';
+import Todo from '../components/Todo.astro';
+import { projectsFor } from '../lib/projects';
+import UpdateList from '../components/UpdateList.astro';
+import { updates } from '../data/updates';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+import { profileLinks } from '../lib/links';
+
+const projects = await projectsFor('home');
+const links = profileLinks();
+---
+
+<Base>
+  <section class="wrap intro wash">
+    <p class="name">{site.name}</p>
+    <div class="intro-row">
+    <div class="intro-text">
+      <h1>
+        Hi, I'm <strong>Noah</strong>, a PhD researcher in neuroscience at Caltech, advised by {site.advisor} in the{' '}
+        <a href={site.lab.href}>{site.lab.label}</a>.
+      </h1>
+      <p>
+        <span class="lead">I study{' '}
+        <a href={url('/research/neuroscience/')}><DecryptText from="emotion" to="fear · anxiety" reserve="none" /></a> and{' '}
+        <a href={url('/research/cognition/')}><DecryptText from="cognition" to={site.cognitionPhrase} reserve="none" /></a></span>{' '}
+        across{' '}
+        <a href={url('/research/ai/')}><DecryptText from="intelligent systems" to="humans · agents" /></a>{' '}
+        <span class="keep">and build <a href={url('/tools/')}>tools</a></span> that help people think and work better.
+      </p>
+      <p>
+        I'm broadly interested in how emotion shapes cognition, what this means for AI alignment, and the future of
+        neurotechnology.
+      </p>
+      <LinkRow links={links} label="Profiles" />
+      {!site.cvFile && <Todo note="CV link: add a public CV PDF (no phone or email) to /public and set cvFile in src/data/site.ts" />}
+    </div>
+    <Portrait />
+    </div>
+  </section>
+
+  <section class="wrap section">
+    <Label moreHref={url('/updates/')} moreLabel="all updates">updates</Label>
+    <UpdateList items={updates.slice(0, 4)} />
+  </section>
+
+  <section class="wrap section">
+    <Label moreHref={url('/research/')} moreLabel="all projects">selected projects</Label>
+    <ProjectGrid projects={projects} audience="home" />
+  </section>
+
+</Base>
+
+<style>
+  /* Top of the homepage. Layout is chosen by `hero` in src/data/site.ts:
+     'name'      a large name heads the page, then text beside the portrait
+     'statement' no name; the text is larger and leads on its own */
+  .intro { padding-block: clamp(6px, 1.2vw, 12px) clamp(28px, 5vw, 48px); }
+  .intro-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    --portrait-size: 380px;
+  }
+  .intro-row :global(.portrait) { margin: -24px -60px -24px 0; }
+  /* The text column is a size container so the "I study…" sentence can adapt to its width (below). */
+  .intro-text {
+    flex: 0 1 580px;
+    min-width: 0;
+    container-type: inline-size;
+    font-size: calc(var(--text-size) + 2.5px);
+    line-height: 1.42;
+  }
+  /* The greeting is a sentence, not a title: it follows the prose face. */
+  h1 { font: inherit; letter-spacing: 0; margin-bottom: 1em; }
+  .intro-text :global(.linkrow) { margin-top: 1.5em; font-size: 0.82em; }
+  /* "emotion" and "cognition" widen on hover (no space is held open for them), so the
+     sentence is arranged to keep its line breaks still while they do:
+     - full-width column: the first line has room for either word's longer phrase, and
+       "and build tools" is held together so it cannot hop up onto that line;
+     - narrower column: "I study emotion and cognition" takes a line of its own.
+     On phone-width columns the text simply reflows when a word is tapped. */
+  .keep { white-space: nowrap; }
+  @container (min-width: 400px) and (max-width: 575px) {
+    .lead { display: block; white-space: nowrap; }
+  }
+
+  .name {
+    display: none;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(38px, 5.2vw, 50px);
+    line-height: 1.05;
+    letter-spacing: -0.005em;
+  }
+  :global([data-hero='name']) .name { display: block; }
+  :global([data-hero='name']) .intro-row { margin-top: clamp(28px, 4.5vw, 52px); }
+
+  :global([data-hero='statement']) .intro { padding-top: clamp(48px, 8vw, 88px); }
+  :global([data-hero='statement']) .intro-text { font-size: clamp(21px, 2.5vw, 25px); line-height: 1.38; }
+  :global([data-hero='statement']) .intro-row { --portrait-size: 390px; }
+
+  /* Phones: the name is centered with the portrait directly under it, then the
+     introduction. The portrait's soft halo overlaps the rows above and below (negative
+     margins), so the three sit close together. */
+  @media (max-width: 720px) {
+    .intro { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; }
+    .intro-row { display: contents; }
+    .name { grid-row: 1; text-align: center; margin-top: 10px; }
+    .intro .intro-row :global(.portrait) { grid-row: 2; margin: -4px 0 -6px; }
+    .intro .intro-text { grid-row: 3; justify-self: stretch; font-size: calc(var(--text-size) + 1.5px); }
+  }
+
+  @media (max-width: 900px) {
+    .intro-row { flex-direction: column-reverse; align-items: flex-start; gap: 8px; }
+    .intro-text { flex: none; width: 100%; max-width: 580px; }
+    .intro-row :global(.portrait) { margin: 0 0 0 -28px; }
+    :global([data-hero='name']) .intro-row { margin-top: 12px; }
+  }
+</style>

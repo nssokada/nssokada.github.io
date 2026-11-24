@@ -1,0 +1,39 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Figure from '../../components/Figure.astro';
+import Todo from '../../components/Todo.astro';
+import Link from '../../components/Link.astro';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('writing', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+interface Props {
+  post: CollectionEntry<'writing'>;
+}
+const { post } = Astro.props;
+const { Content } = await render(post);
+const fmt = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+
+<Base title={post.data.title} description={post.data.summary} ogType="article">
+  <article class="wrap">
+    <header class="page-head">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a class="plain" href={url('/writing/')}><span aria-hidden="true">/</span>writing</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page">{post.id}</li>
+        </ol>
+      </nav>
+      <h1>{post.data.title}</h1>
+      <p class="muted small"><time datetime={post.data.date.toISOString()}>{fmt.format(post.data.date)}</time></p>
+    </header>
+    <div class="prose">
+      <Content components={{ Todo, Figure, a: Link }} />
+    </div>
+  </article>
+</Base>

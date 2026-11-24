@@ -1,0 +1,35 @@
+---
+import ProjectVisual from './ProjectVisual.astro';
+import type { Project } from '../lib/projects';
+import { url } from '../lib/url';
+
+interface Props {
+  project: Project;
+  summary?: string;
+  headingLevel?: 'h2' | 'h3';
+}
+const { project, summary = project.data.summary, headingLevel: H = 'h3' } = Astro.props;
+const href = url(`/projects/${project.id}/`);
+---
+
+<article class="card">
+  <a class="media" href={href} tabindex="-1" aria-hidden="true">
+    <ProjectVisual project={project} />
+  </a>
+  <p class="meta">
+    <span>{project.data.period}</span>
+    <span class="dot" aria-hidden="true">·</span>
+    <span>{project.data.status}</span>
+  </p>
+  <H class="title"><a href={href}>{project.data.title}</a></H>
+  <p class="summary">{summary}</p>
+</article>
+
+<style>
+  .card { display: flex; flex-direction: column; }
+  .media { display: block; text-decoration: none; font-weight: var(--w-light); }
+  .media:hover { color: inherit; }
+  .meta { margin: 12px 0 2px; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 7px; }
+  .title { font-size: 18px; line-height: 1.35; letter-spacing: 0; }
+  .summary { margin: 4px 0 0; font-size: 16px; line-height: 1.45; max-width: 34em; }
+</style>

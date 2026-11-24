@@ -1,0 +1,44 @@
+---
+import Base from '../../layouts/Base.astro';
+import Label from '../../components/Label.astro';
+import ProjectGrid from '../../components/ProjectGrid.astro';
+import PublicationList from '../../components/PublicationList.astro';
+import ResearchTabs from '../../components/ResearchTabs.astro';
+import { projectsFor } from '../../lib/projects';
+import { publications } from '../../data/publications';
+
+const projects = await projectsFor('ai');
+const pubs = publications.filter((p) => ['llm-compromise-2026', 'eye-gaze-familiarity-2024'].includes(p.key));
+---
+
+<Base
+  title="AI research"
+  description="Noah Okada's AI research: comparing LLM agents' risk-taking and coordination with human behavior, and AI scoring for cognitive assessment."
+>
+  <section class="wrap page-head">
+    <h1>Studying AI agents with the tools of cognitive science.</h1>
+    <p class="lede">
+      I design experiments and evaluations that compare how AI agents and people behave. I'm especially interested in
+      emotion and what it implies for AI alignment.
+    </p>
+    <ResearchTabs />
+  </section>
+
+  <section class="wrap section">
+    <Label>projects</Label>
+    <ProjectGrid projects={projects} audience="ai" />
+  </section>
+
+  <section class="wrap section">
+    <Label>methods</Label>
+    <p class="read">
+      LLM evaluation, natural language processing, speech recognition, hierarchical Bayesian modeling, and
+      reinforcement learning.
+    </p>
+  </section>
+
+  <section class="wrap section">
+    <Label>publications</Label>
+    <PublicationList items={pubs} />
+  </section>
+</Base>

@@ -1,0 +1,16 @@
+---
+// "// section label" heading. The slashes are decorative and hidden from screen readers.
+interface Props {
+  as?: 'h2' | 'h3';
+  moreHref?: string;
+  moreLabel?: string;
+}
+const { as: Tag = 'h2', moreHref, moreLabel } = Astro.props;
+---
+
+<div class="label">
+  <Tag style="font: inherit; letter-spacing: inherit; color: inherit;">
+    <span class="slashes" aria-hidden="true">//</span><slot />
+  </Tag>
+  {moreHref && <a href={moreHref}>{moreLabel}</a>}
+</div>

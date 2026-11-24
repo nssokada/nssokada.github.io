@@ -1,0 +1,9 @@
+---
+// Replaces <a> in MDX content. Root-relative links ("/projects/emlt/") get the
+// deploy base added, so content never hard-codes where the site is hosted.
+import { url } from '../lib/url';
+const { href = '', ...rest } = Astro.props;
+const internal = typeof href === 'string' && href.startsWith('/') && !href.startsWith('//');
+---
+
+<a href={internal ? url(href) : href} {...rest}><slot /></a>

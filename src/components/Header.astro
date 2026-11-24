@@ -1,0 +1,208 @@
+---
+// The menu is a single "/current-page" label. Hovering, focusing, or tapping it
+// drops down the list of pages, so nothing is reachable by hover alone.
+// When it opens, the label and the page names "decrypt": they scramble and resolve
+// left to right (the same effect as DecryptText). The real names stay in the HTML;
+// the scrambling copy is hidden from screen readers and sits out of flow, so the
+// menu never changes size under the pointer.
+import ThemeToggle from './ThemeToggle.astro';
+import { nav } from '../data/site';
+import { url, isActive } from '../lib/url';
+
+const current = Astro.url.pathname;
+const active = (item: (typeof nav)[number]) =>
+  isActive(current, item.path) || (item.also ?? []).some((p) => isActive(current, p));
+const here = nav.find(active);
+// Pages outside the menu (e.g. /venture/) show their own first path segment.
+const fallback = current.replace(url('/'), '').split('/')[0] || 'home';
+const label = here?.label ?? fallback;
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <nav class="menu" aria-label="Main">
+      <button class="trigger" type="button" aria-expanded="false" aria-controls="site-menu">
+        <span class="sr-only">Menu, current section: </span><span aria-hidden="true">/</span><span class="word"><span class="base">{label}</span><span class="live" aria-hidden="true"></span></span>
+      </button>
+      <ul id="site-menu">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={url(item.path)} aria-current={active(item) ? 'page' : undefined}>
+                <span class="slash" aria-hidden="true">/</span><span class="word"><span class="base">{item.label}</span><span class="live" aria-hidden="true"></span></span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="controls">
+      <ThemeToggle />
+    </div>
+  </div>
+</header>
+
+<style>
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-block: 20px 4px;
+  }
+  .menu { position: relative; z-index: 30; }
+  .controls { display: flex; align-items: center; gap: 6px; }
+  .trigger {
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 6px 0;
+    margin: 0;
+    font: inherit;
+    font-size: 16px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .menu:focus-within .trigger,
+  .menu.open .trigger { color: var(--fg); }
+  /* Hover only where there is a real pointer: on touch screens "hover" sticks after a
+     tap and would hold the list open. */
+  @media (hover: hover) {
+    .menu:hover .trigger { color: var(--fg); }
+    .menu:hover ul { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    /* Top padding bridges the gap so the pointer can travel from label to list. */
+    padding: 8px 32px 10px 14px;
+    position: absolute;
+    top: 100%;
+    left: -15px;
+    min-width: 150px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity 0.14s ease, transform 0.14s ease, visibility 0s linear 0.14s;
+  }
+  .menu:focus-within ul,
+  .menu.open ul {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+  a {
+    display: block;
+    padding-block: 4px;
+    font-size: 16px;
+    font-weight: var(--w-light);
+    text-decoration: none;
+    color: var(--muted);
+  }
+  a:hover { color: var(--fg); }
+  a[aria-current='page'] { color: var(--fg); font-weight: var(--w-bold); }
+  /* The underline is drawn on the word itself (it does not pass into an inline-block). */
+  a[aria-current='page'] .base,
+  a[aria-current='page'] .live {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.14em;
+  }
+  /* The real name holds the space; the scrambling copy is laid over it. */
+  .word { position: relative; display: inline-block; }
+  .live {
+    position: absolute;
+    left: 0;
+    top: 0;
+    white-space: pre;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .word.is-scrambling .base { opacity: 0; }
+  .slash { font-weight: var(--w-light); display: inline-block; text-decoration: none; margin-right: 1px; }
+  /* Phones: finger-sized label and rows. */
+  @media (max-width: 720px) {
+    .bar { padding-block: 10px 0; }
+    .trigger { padding-block: 12px; }
+    ul { padding: 4px 40px 8px 14px; min-width: 170px; }
+    a { padding-block: 11px; }
+  }
+</style>
+
+<script>
+  import { resolveText } from '../lib/scramble';
+
+  const menu = document.querySelector<HTMLElement>('.menu');
+  const trigger = menu?.querySelector<HTMLElement>('.trigger');
+  if (menu && trigger) {
+    const set = (open: boolean) => {
+      menu.classList.toggle('open', open);
+      trigger.setAttribute('aria-expanded', String(open));
+    };
+
+    // ── Decrypt effect: plays once each time the menu goes from closed to open. ──
+    const DURATION = 420; // per name
+    const STAGGER = 60; // each page name starts resolving a beat after the one above
+    const words = [...menu.querySelectorAll<HTMLElement>('.word')]; // the label, then the page names
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let stops: Array<() => void> = [];
+    let shown = false;
+    const stop = () => {
+      stops.forEach((s) => s());
+      stops = [];
+    };
+    const play = () => {
+      stop();
+      if (reduceMotion.matches) return;
+      stops = words.map((word, i) => {
+        const live = word.querySelector<HTMLElement>('.live')!;
+        const text = word.querySelector('.base')!.textContent ?? '';
+        word.classList.add('is-scrambling');
+        return resolveText(live, text, {
+          duration: DURATION,
+          delay: Math.max(0, i - 1) * STAGGER,
+          onEnd: () => {
+            word.classList.remove('is-scrambling');
+            live.textContent = '';
+          },
+        });
+      });
+    };
+    // The menu shows on hover, on keyboard focus, or when tapped open; treat them as one state.
+    const canHover = matchMedia('(hover: hover)');
+    const sync = () => {
+      const now =
+        (canHover.matches && menu.matches(':hover')) || menu.matches(':focus-within') || menu.classList.contains('open');
+      if (now && !shown) play();
+      if (!now && shown) stop();
+      shown = now;
+    };
+    const syncSoon = () => setTimeout(sync, 0);
+
+    // Tap or click toggles it (touch screens have no hover).
+    // Closing by tap also drops focus, which would otherwise keep the list showing; a
+    // keyboard "click" (detail 0) keeps its focus.
+    trigger.addEventListener('click', (e) => {
+      const open = !menu.classList.contains('open');
+      set(open);
+      if (!open && e.detail > 0 && !canHover.matches) trigger.blur();
+      sync();
+    });
+    menu.addEventListener('mouseenter', () => { trigger.setAttribute('aria-expanded', 'true'); sync(); });
+    menu.addEventListener('mouseleave', () => { trigger.setAttribute('aria-expanded', String(menu.classList.contains('open'))); syncSoon(); });
+    menu.addEventListener('focusin', () => { trigger.setAttribute('aria-expanded', 'true'); sync(); });
+    menu.addEventListener('focusout', (e) => { if (!menu.contains(e.relatedTarget as Node)) set(false); syncSoon(); });
+    document.addEventListener('click', (e) => { if (!menu.contains(e.target as Node)) { set(false); syncSoon(); } });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      set(false);
+      if (menu.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
+      syncSoon();
+    });
+  }
+</script>

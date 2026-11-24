@@ -1,0 +1,14 @@
+---
+import { site } from '../data/site';
+---
+
+<footer class="site-footer">
+  <div class="wrap inner">
+    <span class="muted">{site.name}</span>
+  </div>
+</footer>
+
+<style>
+  .site-footer { margin-top: clamp(40px, 7vw, 72px); font-size: 15px; }
+  .inner { padding-block: 20px 36px; }
+</style>

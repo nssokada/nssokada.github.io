@@ -1,0 +1,12 @@
+---
+// "Google Scholar / LinkedIn / GitHub": the site's plain, slash-separated link row.
+interface Props {
+  links: { label: string; href: string }[];
+  label?: string;
+}
+const { links, label } = Astro.props;
+---
+
+<ul class="linkrow" aria-label={label}>
+  {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+</ul>

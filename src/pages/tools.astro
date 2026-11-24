@@ -1,0 +1,48 @@
+---
+import Base from '../layouts/Base.astro';
+import Label from '../components/Label.astro';
+import ProjectGrid from '../components/ProjectGrid.astro';
+import { projectsFor } from '../lib/projects';
+import { toolsInProgress } from '../data/tools';
+
+const projects = await projectsFor('tools');
+---
+
+<Base
+  title="Tools"
+  description="Tools Noah Okada is building for augmenting cognition and improving how people work."
+>
+  <section class="wrap page-head">
+    <h1>Tools that help people think and work better.</h1>
+    <p class="lede">
+      I'm building software for augmenting cognition and improving how people work. These are in development, and I'll
+      share them here as they're ready.
+    </p>
+  </section>
+
+  {
+    projects.length > 0 && (
+      <section class="wrap section">
+        <Label>projects</Label>
+        <ProjectGrid projects={projects} audience="tools" />
+      </section>
+    )
+  }
+
+  <section class="wrap section">
+    <Label>in development</Label>
+    <ul class="rows">
+      {
+        toolsInProgress.map((t) => (
+          <li>
+            <div>
+              <h3>{t.name}</h3>
+              {t.description && <p>{t.description}</p>}
+            </div>
+            <span class="status">{t.status}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>

@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import Label from '../../components/Label.astro';
+import ProjectGrid from '../../components/ProjectGrid.astro';
+import PublicationList from '../../components/PublicationList.astro';
+import ResearchTabs from '../../components/ResearchTabs.astro';
+import { projectsFor } from '../../lib/projects';
+import { publications } from '../../data/publications';
+
+const projects = await projectsFor('research');
+---
+
+<Base
+  title="Research"
+  description="Noah Okada's research on cognition across humans and AI: anxiety and decision-making, memory in virtual reality, remote cognitive assessment, and LLM agents."
+>
+  <section class="wrap page-head">
+    <h1>I study cognition across humans and AI.</h1>
+    <p class="lede">
+      In people, I work on emotion, anxiety, memory, and decision-making. In AI systems, I look at how agents behave and
+      how that behavior compares with ours.
+    </p>
+    <ResearchTabs />
+  </section>
+
+  <section class="wrap section">
+    <Label>projects</Label>
+    <ProjectGrid projects={projects} audience="research" />
+  </section>
+
+  <section class="wrap section" id="publications">
+    <Label>publications</Label>
+    <PublicationList items={publications} />
+  </section>
+</Base>
