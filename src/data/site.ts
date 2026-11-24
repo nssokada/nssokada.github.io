@@ -2,7 +2,7 @@ export const site = {
   name: 'Noah Okada',
   title: 'Noah Okada',
   description:
-    'Noah Okada is a PhD researcher in neuroscience at Caltech studying emotion and cognition across humans and AI, and building tools that help people think and work better.',
+    'Noah Okada is a PhD student in neuroscience at Caltech studying emotion and cognition across humans and AI, and building tools that help people think and work better.',
   // Public contact links chosen by Noah. No email or phone is published.
   links: [
     { label: 'Scholar', href: 'https://scholar.google.com/citations?user=LJiZIcMAAAAJ&hl=en' },
