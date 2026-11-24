@@ -140,10 +140,7 @@ const others = (await allProjects()).filter((p) => p.id !== project.id).slice(0,
   }
   @media (max-width: 720px) {
     .facts { gap: 5px 16px; margin-top: 20px; }
-    /* Resource links stack, one per line, instead of wrapping mid-row. */
-    .resources { margin-top: 14px; }
-    .resources :global(.linkrow) { flex-direction: column; }
-    .resources :global(.linkrow li::after) { content: none; }
+    .resources { margin-top: 16px; }
     .more { grid-template-columns: minmax(0, 1fr); }
   }
 </style>

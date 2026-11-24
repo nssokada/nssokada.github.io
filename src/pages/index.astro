@@ -52,7 +52,7 @@ const links = profileLinks();
 
   <section class="wrap section">
     <Label moreHref={url('/research/')} moreLabel="all projects">selected projects</Label>
-    <ProjectGrid projects={projects} audience="home" />
+    <ProjectGrid projects={projects} audience="home" scrollable />
   </section>
 
 </Base>
@@ -61,7 +61,7 @@ const links = profileLinks();
   /* Top of the homepage. Layout is chosen by `hero` in src/data/site.ts:
      'name'      a large name heads the page, then text beside the portrait
      'statement' no name; the text is larger and leads on its own */
-  .intro { padding-block: clamp(6px, 1.2vw, 12px) clamp(28px, 5vw, 48px); }
+  .intro { padding-block: clamp(18px, 2.4vw, 26px) clamp(28px, 5vw, 48px); }
   .intro-row {
     display: flex;
     align-items: center;
@@ -108,13 +108,14 @@ const links = profileLinks();
   :global([data-hero='statement']) .intro-row { --portrait-size: 390px; }
 
   /* Phones: the name is centered with the portrait directly under it, then the
-     introduction. The portrait's soft halo overlaps the rows above and below (negative
-     margins), so the three sit close together. */
+     introduction, with room to breathe between the three. */
   @media (max-width: 720px) {
     .intro { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; }
     .intro-row { display: contents; }
-    .name { grid-row: 1; text-align: center; margin-top: 10px; }
-    .intro .intro-row :global(.portrait) { grid-row: 2; margin: -4px 0 -6px; }
+    .intro { padding-bottom: 40px; }
+    .name { grid-row: 1; text-align: center; margin-top: 14px; }
+    .intro .intro-row :global(.portrait) { grid-row: 2; margin: 12px 0 20px; }
+    .intro-text :global(.linkrow) { margin-top: 1.7em; }
     .intro .intro-text { grid-row: 3; justify-self: stretch; font-size: calc(var(--text-size) + 1.5px); }
   }
 

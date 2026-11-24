@@ -172,6 +172,10 @@ a.plain:hover { color: var(--fg); text-decoration: underline; text-decoration-th
 }
 .read { max-width: var(--read); }
 .section { padding-block: clamp(28px, 4.5vw, 44px); }
+/* Hairlines give the page its structure: one under the menu, one above each section and
+   one above the footer. Each is as wide as the text column (the element minus its gutters). */
+.section, .ruled-top { background: linear-gradient(var(--rule), var(--rule)) center top / calc(100% - 2 * var(--gutter)) 1px no-repeat; }
+.ruled-bottom { background: linear-gradient(var(--rule), var(--rule)) center bottom / calc(100% - 2 * var(--gutter)) 1px no-repeat; }
 .muted { color: var(--muted); }
 .small { font-size: 15px; }
 
@@ -181,18 +185,35 @@ a.plain:hover { color: var(--fg); text-decoration: underline; text-decoration-th
   color: var(--muted);
   margin-bottom: 18px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 .label .slashes { margin-right: 0.4em; }
-.label a { font-size: 15px; color: var(--fg); white-space: nowrap; }
-.label a:hover { color: var(--muted); }
 
-/* "Scholar / LinkedIn / GitHub": link rows follow the prose face, not the system face. */
-.linkrow { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 0; margin: 0; padding: 0; }
-/* The slash trails its item, so a wrapped row never starts a line with one. */
-.linkrow li:not(:last-child)::after { content: "/"; color: var(--muted); margin-inline: 0.55em; }
+/* Pills: a few action links are outlined ovals in the system face: link rows (profiles,
+   a project's resources), the "all …" link beside a section label, and the research
+   tabs. Links inside running text and the menu are never pills. */
+.linkrow a, .label a, .tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 31px;
+  padding: 0 14px;
+  border: 1px solid var(--fg);
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--fg);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+.linkrow a:hover, .label a:hover, .tabs a:hover,
+.tabs a[aria-current="page"] { background: var(--fg); color: var(--bg); }
+.linkrow, .tabs { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; }
+.tabs { margin-top: 20px; }
 
 /* Heading block for landing pages */
 .page-head { padding-block: clamp(36px, 6vw, 64px) clamp(8px, 2vw, 16px); }
@@ -202,11 +223,6 @@ a.plain:hover { color: var(--fg); text-decoration: underline; text-decoration-th
 
 .crumbs { font-size: 15px; color: var(--muted); margin-bottom: 18px; }
 .crumbs ol { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4em; margin: 0; padding: 0; }
-
-.tabs { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 16px; margin-top: 20px; }
-.tabs a { font-weight: var(--w-light); text-decoration: none; color: var(--muted); }
-.tabs a:hover { color: var(--fg); }
-.tabs a[aria-current="page"] { color: var(--fg); font-weight: var(--w-bold); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.14em; }
 
 /* One faint, localized gradient wash behind the homepage introduction. */
 .wash { position: relative; isolation: isolate; }
@@ -258,15 +274,15 @@ a.plain:hover { color: var(--fg); text-decoration: underline; text-decoration-th
   .rows > li { grid-template-columns: 1fr; }
 }
 
-/* Phones: give the small text links a finger-sized target without changing how they look. */
+/* Phones: finger-sized pills and breadcrumbs, and more air between sections. */
 @media (max-width: 720px) {
-  .linkrow a, .tabs a, .label a { display: inline-block; padding-block: 9px; }
-  .linkrow { gap: 0; }
-  .tabs { gap: 0 20px; margin-top: 12px; }
-  .label { align-items: center; margin-bottom: 10px; }
+  .linkrow a, .label a, .tabs a { min-height: 38px; padding: 0 16px; }
+  .tabs { margin-top: 14px; }
+  .label { margin-bottom: 12px; }
   .crumbs a { display: inline-block; padding-block: 9px; }
   .crumbs { margin-bottom: 9px; }
   .crumbs ol { align-items: baseline; }
+  .section { padding-block: 36px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

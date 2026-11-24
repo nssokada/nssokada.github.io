@@ -7,11 +7,14 @@ interface Props {
   projects: Project[];
   audience: AudienceKey;
   headingLevel?: 'h2' | 'h3';
+  // Lay the projects out as one sideways-scrolling row instead of a grid (the homepage
+  // does this; other pages stay a grid).
+  scrollable?: boolean;
 }
-const { projects, audience, headingLevel = 'h3' } = Astro.props;
+const { projects, audience, headingLevel = 'h3', scrollable = false } = Astro.props;
 ---
 
-<ul class="grid" data-count={projects.length}>
+<ul class:list={["grid", { scrollable }]} data-count={projects.length}>
   {
     projects.map((project) => (
       <li>
@@ -32,6 +35,33 @@ const { projects, audience, headingLevel = 'h3' } = Astro.props;
   }
   .grid[data-count='1'] { grid-template-columns: minmax(0, 1fr); max-width: 442px; }
   @media (max-width: 720px) {
-    .grid { grid-template-columns: minmax(0, 1fr); }
+    .grid { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  }
+
+  /* One row that scrolls sideways (swipe, trackpad, or the thin scrollbar). It runs off
+     the right edge of the page so the next card peeks in. The 6px of padding (cancelled
+     by a negative margin) keeps focus outlines from being cut off, since a scrolling box
+     clips whatever pokes outside it. */
+  .grid.scrollable {
+    display: flex;
+    gap: clamp(18px, 2.6vw, 28px);
+    overflow-x: auto;
+    overscroll-behavior-x: contain; /* a swipe at the start of the row is not "back" */
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 6px var(--gutter);
+    margin: -6px calc(-1 * var(--gutter)) -6px -6px;
+    padding: 6px var(--gutter) 10px 6px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+  .grid.scrollable > li { flex: 0 0 clamp(250px, 37%, 348px); scroll-snap-align: start; }
+  /* Touch screens scroll by swiping, so the scrollbar is not shown there. */
+  @media (max-width: 720px), (hover: none) {
+    .grid.scrollable { scrollbar-width: none; }
+    .grid.scrollable::-webkit-scrollbar { display: none; }
+  }
+  @media (max-width: 720px) {
+    .grid.scrollable { gap: 16px; }
+    .grid.scrollable > li { flex-basis: min(76vw, 320px); }
   }
 </style>

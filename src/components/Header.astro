@@ -19,7 +19,7 @@ const label = here?.label ?? fallback;
 ---
 
 <header class="site-header">
-  <div class="wrap bar">
+  <div class="wrap bar ruled-bottom">
     <nav class="menu" aria-label="Main">
       <button class="trigger" type="button" aria-expanded="false" aria-controls="site-menu">
         <span class="sr-only">Menu, current section: </span><span aria-hidden="true">/</span><span class="word"><span class="base">{label}</span><span class="live" aria-hidden="true"></span></span>
@@ -48,7 +48,7 @@ const label = here?.label ?? fallback;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding-block: 20px 4px;
+    padding-block: 14px 10px;
   }
   .menu { position: relative; z-index: 30; }
   .controls { display: flex; align-items: center; gap: 6px; }
@@ -127,7 +127,7 @@ const label = here?.label ?? fallback;
   .slash { font-weight: var(--w-light); display: inline-block; text-decoration: none; margin-right: 1px; }
   /* Phones: finger-sized label and rows. */
   @media (max-width: 720px) {
-    .bar { padding-block: 10px 0; }
+    .bar { padding-block: 6px 4px; }
     .trigger { padding-block: 12px; }
     ul { padding: 4px 40px 8px 14px; min-width: 170px; }
     a { padding-block: 11px; }
