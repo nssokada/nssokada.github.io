@@ -27,7 +27,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <!-- 岡田 (Okada). The SVG is used where supported; the PNG is the fallback, and the
+         larger PNG is what phones show when the site is added to a home screen. -->
+    <link rel="icon" type="image/png" sizes="32x32" href={url('/favicon-32.png')} />
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+    <link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title ?? site.name} />
@@ -51,6 +55,16 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         if (meta) meta.setAttribute('content', dark ? '#000000' : '#ffffff');
       })();
     </script>
+    {
+      site.goatcounter && import.meta.env.PROD && (
+        <script
+          is:inline
+          async
+          data-goatcounter={`https://${site.goatcounter}.goatcounter.com/count`}
+          src="https://gc.zgo.at/count.js"
+        />
+      )
+    }
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>

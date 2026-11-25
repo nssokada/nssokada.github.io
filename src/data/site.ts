@@ -26,6 +26,10 @@ export const site = {
   // Accent colors for the portrait halo, homepage wash and project thumbnails.
   // Defined in src/styles/global.css: 'ember', 'dusk', 'sage', 'sand', 'ink'.
   palette: 'dusk' as 'ember' | 'dusk' | 'sage' | 'sand' | 'ink',
+  // Visitor counts via GoatCounter (privacy-friendly: no cookies, no personal data).
+  // Set this to the site code chosen at sign-up (the "mycode" in mycode.goatcounter.com)
+  // to turn counting on; null = off. Only the published site counts, never the preview.
+  goatcounter: null as string | null,
   // Public CV file placed in /public (e.g. "noah-okada-cv.pdf"); it then leads the link row.
   // Must be a public version: no phone number or email. Null = not offered.
   cvFile: 'noah-okada-cv.pdf' as string | null,
