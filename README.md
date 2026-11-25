@@ -6,7 +6,7 @@ Static site built with [Astro](https://astro.build) and MDX. Deploys to GitHub P
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Local preview at `http://localhost:4321/portfolio/` |
+| `npm run dev` | Local preview at `http://localhost:4321/` |
 | `npm run build:draft` | Build to `dist/` and verify internal links (placeholders allowed) |
 | `npm run build` | The launch build: also fails if any internal placeholder remains. This is what the deploy runs. |
 
@@ -46,5 +46,9 @@ the project's `emphasis` frontmatter.
 Pushing to `main` runs `.github/workflows/deploy.yml`, which builds, runs the launch
 check, and publishes to GitHub Pages (repo Settings → Pages → Source: GitHub Actions).
 
-To move to a custom domain later, set `SITE_URL` and `SITE_BASE=/` (or change the
-defaults in `astro.config.mjs`) and add `public/CNAME`. No page needs to change.
+The site is served at `https://nssokada.github.io/` because the repository is named
+`nssokada.github.io`. It first lived at `/portfolio/`; `public/portfolio/index.html` and a
+small script on the 404 page forward old links to the new address.
+
+To move to a custom domain later, set `SITE_URL` (or change the default in
+`astro.config.mjs`) and add `public/CNAME`. No page needs to change.

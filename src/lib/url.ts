@@ -1,5 +1,5 @@
 // Every internal link and public asset goes through this helper so the site
-// works under any deploy base ("/portfolio/" today, "/" on a custom domain).
+// works under any deploy base ("/" today; a sub-path such as "/portfolio/" also works).
 const base = import.meta.env.BASE_URL.endsWith('/')
   ? import.meta.env.BASE_URL
   : `${import.meta.env.BASE_URL}/`;

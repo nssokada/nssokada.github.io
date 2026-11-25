@@ -4,6 +4,13 @@ import { url } from '../lib/url';
 ---
 
 <Base title="Page not found">
+  <!-- The site first lived under /portfolio/. Forward any old link to its new address. -->
+  <script is:inline>
+    (function () {
+      var m = location.pathname.match(/^\/portfolio(\/.*)?$/);
+      if (m) location.replace((m[1] || '/') + location.search + location.hash);
+    })();
+  </script>
   <section class="wrap page-head">
     <h1>/404</h1>
     <p class="lede">

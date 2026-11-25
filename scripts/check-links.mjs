@@ -1,10 +1,10 @@
 // Verifies every internal href/src in dist/ resolves to a built file.
-// Usage: node scripts/check-links.mjs [base]   (base defaults to $SITE_BASE, else /portfolio)
+// Usage: node scripts/check-links.mjs [base]   (base defaults to $SITE_BASE, else the site root)
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 
 const dist = new URL('../dist/', import.meta.url).pathname;
-const base = (process.argv[2] ?? process.env.SITE_BASE ?? '/portfolio').replace(/\/$/, '');
+const base = (process.argv[2] ?? process.env.SITE_BASE ?? '/').replace(/\/$/, '');
 const pages = [];
 async function walk(dir) {
   for (const e of await readdir(dir, { withFileTypes: true })) {
